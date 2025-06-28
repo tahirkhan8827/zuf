@@ -23,7 +23,7 @@ const App = () => {
   return (
     <>
     
-    <BrowserRouter>
+    <BrowserRouter basename="/zuclothing">
     
     <Routes>
 
