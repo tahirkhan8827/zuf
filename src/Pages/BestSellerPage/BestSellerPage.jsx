@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import Header from '../../component/Header/Header'
-import Footer from '../../component/Footer/Footer'
-import BestSeller from '../../component/BestSeller/BestSeller'
-import axios from 'axios'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { checkAuth } from '../../component/LoginRequired/checkAuth'
-import Notification from '../../component/Notification/Notification'
+import React, { useEffect, useState } from "react";
+import Header from "../../component/Header/Header";
+import Footer from "../../component/Footer/Footer";
+import BestSeller from "../../component/BestSeller/BestSeller";
+import axios from "axios";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { checkAuth } from "../../component/LoginRequired/checkAuth";
+import Notification from "../../component/Notification/Notification";
 
 const BestSellerPage = () => {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const BestSellerPage = () => {
   const [notification, setNotification] = useState(null);
   const [selectedSizes, setSelectedSizes] = useState({});
 
-  const showNotification = (message, type = 'success') => {
+  const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -25,41 +25,46 @@ const BestSellerPage = () => {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/products/?is_best=true");
-        
+        const res = await axios.get(
+          "https://zuclothingbackend.onrender.com/api/products/?is_best=true"
+        );
+
         const productsWithImagesAndSizes = res.data.map((product) => {
-          let imageUrl = '/placeholder-product.jpg';
-          
+          let imageUrl = "/placeholder-product.jpg";
+
           if (product.colors?.length > 0) {
             const firstColor = product.colors[0];
             if (firstColor.images?.length > 0) {
-              const defaultImage = firstColor.images.find(img => img.is_default);
-              imageUrl = defaultImage?.image_url || firstColor.images[0].image_url;
+              const defaultImage = firstColor.images.find(
+                (img) => img.is_default
+              );
+              imageUrl =
+                defaultImage?.image_url || firstColor.images[0].image_url;
             }
           }
 
           // Find first available size or default to first size
-          const firstAvailableSize = product.sizes?.find(size => size.stock > 0)?.size || 
-                                  product.sizes?.[0]?.size;
+          const firstAvailableSize =
+            product.sizes?.find((size) => size.stock > 0)?.size ||
+            product.sizes?.[0]?.size;
 
           return {
             ...product,
             image: imageUrl,
-            defaultSize: firstAvailableSize
+            defaultSize: firstAvailableSize,
           };
         });
 
         setBestSellers(productsWithImagesAndSizes);
-        
+
         // Initialize selected sizes
         const initialSizes = {};
-        productsWithImagesAndSizes.forEach(product => {
+        productsWithImagesAndSizes.forEach((product) => {
           if (product.defaultSize) {
             initialSizes[product.id] = product.defaultSize.id;
           }
         });
         setSelectedSizes(initialSizes);
-
       } catch (err) {
         console.error("Failed to load best sellers", err);
         setError("Failed to load products. Please try again later.");
@@ -77,18 +82,18 @@ const BestSellerPage = () => {
   };
 
   const handleSizeChange = (productId, sizeId) => {
-    setSelectedSizes(prev => ({
+    setSelectedSizes((prev) => ({
       ...prev,
-      [productId]: sizeId
+      [productId]: sizeId,
     }));
   };
 
   const addToCart = async (productId) => {
-    if (!await checkAuth()) {
-      navigate('/login', { state: { from: location.pathname } });
+    if (!(await checkAuth())) {
+      navigate("/login", { state: { from: location.pathname } });
       return;
     }
-    
+
     const selectedSizeId = selectedSizes[productId];
     if (!selectedSizeId) {
       showNotification("Please select a size", "error");
@@ -99,18 +104,21 @@ const BestSellerPage = () => {
       setAddingToCartId(productId);
       const csrftoken = getCookie("csrftoken");
 
-      const response = await fetch(`http://localhost:8000/api/cart/add/${productId}/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrftoken,
-        },
-        credentials: "include",
-        body: JSON.stringify({ 
-          quantity: 1,
-          size_id: selectedSizeId
-        }),
-      });
+      const response = await fetch(
+        `https://zuclothingbackend.onrender.com/api/cart/add/${productId}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            quantity: 1,
+            size_id: selectedSizeId,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -121,7 +129,10 @@ const BestSellerPage = () => {
       showNotification(data.message || "Product added to cart successfully!");
     } catch (error) {
       console.error("Error adding to cart:", error);
-      showNotification(error.message || "Failed to add product. Please try again.", "error");
+      showNotification(
+        error.message || "Failed to add product. Please try again.",
+        "error"
+      );
     } finally {
       setAddingToCartId(null);
     }
@@ -131,9 +142,9 @@ const BestSellerPage = () => {
   if (error) return <div className="error">{error}</div>;
   return (
     <>
-      <Header/>
+      <Header />
       <h1 className="bestseller">Best Seller</h1>
-      
+
       {notification && (
         <Notification
           message={notification.message}
@@ -161,42 +172,54 @@ const BestSellerPage = () => {
               </Link>
               <div className="best-seller-info">
                 <h3 className="best-seller-title">
-                  <Link to={`/product/${item.id}`} className="best-seller-title-link">
+                  <Link
+                    to={`/product/${item.id}`}
+                    className="best-seller-title-link"
+                  >
                     {item.name}
                   </Link>
                 </h3>
                 <div className="best-seller-price-wrapper">
-                  <span className="best-seller-current-price">₹{item.currentprice}</span>
-                  {item.orignalprice && item.orignalprice > item.currentprice && (
-                    <span className="best-seller-original-price">₹{item.orignalprice}</span>
-                  )}
+                  <span className="best-seller-current-price">
+                    ₹{item.currentprice}
+                  </span>
+                  {item.orignalprice &&
+                    item.orignalprice > item.currentprice && (
+                      <span className="best-seller-original-price">
+                        ₹{item.orignalprice}
+                      </span>
+                    )}
                 </div>
-                
+
                 {/* Added size selector */}
                 {item.sizes?.length > 0 && (
                   <div className="size-selector">
                     <select
                       value={selectedSizes[item.id] || ""}
-                      onChange={(e) => handleSizeChange(item.id, e.target.value)}
+                      onChange={(e) =>
+                        handleSizeChange(item.id, e.target.value)
+                      }
                       className="size-dropdown"
                     >
                       {item.sizes.map(({ size, stock }) => (
-                        <option 
-                          key={size.id} 
+                        <option
+                          key={size.id}
                           value={size.id}
                           disabled={stock <= 0}
                         >
-                          {size.name} {stock <= 0 ? '(Out of Stock)' : ''}
+                          {size.name} {stock <= 0 ? "(Out of Stock)" : ""}
                         </option>
                       ))}
                     </select>
                   </div>
                 )}
-                
+
                 <button
                   className="best-seller-add-to-cart"
                   onClick={() => addToCart(item.id)}
-                  disabled={addingToCartId === item.id || !selectedSizes[item.id]}
+                  disabled={
+                    addingToCartId === item.id || !selectedSizes[item.id]
+                  }
                 >
                   {addingToCartId === item.id ? "Adding..." : "Add to Cart"}
                 </button>
@@ -205,9 +228,9 @@ const BestSellerPage = () => {
           ))}
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
-  )
-}
+  );
+};
 
-export default BestSellerPage
+export default BestSellerPage;

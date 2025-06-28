@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
-import './Login.css';
-import { Link, useNavigate } from 'react-router-dom';
-import Notification from '../../Notification/Notification';
-import ConfirmationModal from '../../ConfirmationModal/ConfirmationModal';
-import { FiCheckCircle } from 'react-icons/fi';
+import React, { useState } from "react";
+import "./Login.css";
+import { Link, useNavigate } from "react-router-dom";
+import Notification from "../../Notification/Notification";
+import ConfirmationModal from "../../ConfirmationModal/ConfirmationModal";
+import { FiCheckCircle } from "react-icons/fi";
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
 
-  const showNotification = (message, type = 'success') => {
+  const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -33,26 +33,31 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        "https://zuclothingbackend.onrender.com/api/login/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || "Login failed");
       }
 
       setShowSuccessModal(true);
-      
     } catch (error) {
-      console.error('Login error:', error);
-      showNotification(error.message || 'Login failed. Please try again.', 'error');
+      console.error("Login error:", error);
+      showNotification(
+        error.message || "Login failed. Please try again.",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -60,7 +65,7 @@ const Login = () => {
 
   const handleConfirmSuccess = () => {
     setShowSuccessModal(false);
-    navigate('/');
+    navigate("/");
   };
   const handleCloseModal = () => {
     setShowSuccessModal(false);
@@ -71,8 +76,10 @@ const Login = () => {
       <div className="login-container">
         <div className="login-form-container">
           <h1 className="login-title">Login</h1>
-          <p className="login-subtitle">Please enter your e-mail and password:</p>
-          
+          <p className="login-subtitle">
+            Please enter your e-mail and password:
+          </p>
+
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
               <label htmlFor="email">Email</label>
@@ -101,20 +108,18 @@ const Login = () => {
             </div>
 
             <div className="form-options">
-              <Link to="/forgot-password" className="forgot-password">Forgot password?</Link>
+              <Link to="/forgot-password" className="forgot-password">
+                Forgot password?
+              </Link>
             </div>
 
-            <button 
-              type="submit" 
-              className="login-button"
-              disabled={loading}
-            >
-              {loading ? 'Logging in...' : 'LOG IN'}
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? "Logging in..." : "LOG IN"}
             </button>
           </form>
 
           <div className="signup-link">
-            Don't have an account? <Link to={'/register'}>Create one</Link>
+            Don't have an account? <Link to={"/register"}>Create one</Link>
           </div>
         </div>
       </div>
@@ -126,9 +131,9 @@ const Login = () => {
           onClose={() => setNotification(null)}
         />
       )}
-  <ConfirmationModal
+      <ConfirmationModal
         isOpen={showSuccessModal}
-        onClose={handleCloseModal}  /* Use the defined function here */
+        onClose={handleCloseModal} /* Use the defined function here */
         onConfirm={handleConfirmSuccess}
         title="Login Successful!"
         message="Welcome back! You have successfully logged in."
@@ -136,7 +141,6 @@ const Login = () => {
         icon={FiCheckCircle}
         type="success"
       />
-      
     </>
   );
 };

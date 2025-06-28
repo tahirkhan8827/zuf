@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import './Register.css';
-import { Link, useNavigate } from 'react-router-dom';
-import Notification from '../../Notification/Notification';
-import ConfirmationModal from '../../ConfirmationModal/ConfirmationModal';
-import { FiCheckCircle } from 'react-icons/fi';
+import React, { useState } from "react";
+import "./Register.css";
+import { Link, useNavigate } from "react-router-dom";
+import Notification from "../../Notification/Notification";
+import ConfirmationModal from "../../ConfirmationModal/ConfirmationModal";
+import { FiCheckCircle } from "react-icons/fi";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    password: ''
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
 
-  const showNotification = (message, type = 'success') => {
+  const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -29,9 +29,9 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -40,25 +40,30 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/register/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        "https://zuclothingbackend.onrender.com/api/register/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.error || "Registration failed");
       }
 
       setShowSuccessModal(true);
-      
     } catch (error) {
-      console.error('Registration error:', error);
-      showNotification(error.message || 'Registration failed. Please try again.', 'error');
+      console.error("Registration error:", error);
+      showNotification(
+        error.message || "Registration failed. Please try again.",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -66,15 +71,17 @@ const Register = () => {
 
   const handleConfirmSuccess = () => {
     setShowSuccessModal(false);
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
     <>
       <div className="register-form-container my-3">
         <h1 className="register-title">Create Account</h1>
-        <p className="register-subtitle">Please fill in the information below:</p>
-        
+        <p className="register-subtitle">
+          Please fill in the information below:
+        </p>
+
         <form onSubmit={handleSubmit} className="register-form">
           <div className="form-row">
             <div className="form-group">
@@ -129,17 +136,13 @@ const Register = () => {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="register-button"
-            disabled={loading}
-          >
-            {loading ? 'Creating Account...' : 'CREATE ACCOUNT'}
+          <button type="submit" className="register-button" disabled={loading}>
+            {loading ? "Creating Account..." : "CREATE ACCOUNT"}
           </button>
         </form>
 
         <div className="login-link">
-          Already have an account? <Link to={'/login'}>Login</Link>
+          Already have an account? <Link to={"/login"}>Login</Link>
         </div>
       </div>
 
@@ -151,9 +154,9 @@ const Register = () => {
         />
       )}
 
-       <ConfirmationModal
+      <ConfirmationModal
         isOpen={showSuccessModal}
-        onClose={handleCloseModal}  /* Use the defined function here */
+        onClose={handleCloseModal} /* Use the defined function here */
         onConfirm={handleConfirmSuccess}
         title="Registration Successful!"
         message="Your account has been created successfully."

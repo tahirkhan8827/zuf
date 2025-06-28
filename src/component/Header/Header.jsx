@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Header.css";
 import { IoCallOutline } from "react-icons/io5";
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSearch, FiX } from "react-icons/fi";
@@ -19,9 +19,12 @@ const Header = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/check-auth/', {
-          withCredentials: true
-        });
+        const response = await axios.get(
+          "https://zuclothingbackend.onrender.com/api/check-auth/",
+          {
+            withCredentials: true,
+          }
+        );
         setIsLoggedIn(response.data.isAuthenticated);
       } catch (error) {
         console.error("Error checking auth status:", error);
@@ -48,7 +51,7 @@ const Header = () => {
   const fetchSuggestions = async (query) => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/search/suggestions/`,
+        `https://zuclothingbackend.onrender.com/api/search/suggestions/`,
         { params: { q: query } }
       );
       setSuggestions(response.data.suggestions || []);
@@ -61,9 +64,9 @@ const Header = () => {
   const handleProfileClick = (e) => {
     e.preventDefault();
     if (isLoggedIn) {
-      navigate('/profile');
+      navigate("/profile");
     } else {
-      navigate('/login');
+      navigate("/login");
     }
   };
 
@@ -80,7 +83,7 @@ const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery('');
+      setSearchQuery("");
       setShowSearchBar(false);
       setShowSuggestions(false);
     }
@@ -105,7 +108,10 @@ const Header = () => {
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target)
+      ) {
         setShowSuggestions(false);
       }
     };
@@ -148,9 +154,12 @@ const Header = () => {
               <span className="navbar-toggler-icon"></span>
             </button>
             <div className="fill w-25"></div>
-            
+
             {/* Logo */}
-            <Link to={'/'} className="navbar-brand mx-auto d-md-block d-none w-25">
+            <Link
+              to={"/"}
+              className="navbar-brand mx-auto d-md-block d-none w-25"
+            >
               <img
                 src="https://www.zuclothing.com/cdn/shop/files/ZU_438ede84-8d3d-4544-95ca-ceaafda670cf_70x.png?v=1703589164"
                 alt="ZU Clothing Logo"
@@ -160,15 +169,15 @@ const Header = () => {
 
             {/* Header Icons */}
             <div className="d-flex align-items-center gap-3">
-              <a 
-                href="#" 
-                className="text-dark" 
+              <a
+                href="#"
+                className="text-dark"
                 onClick={handleProfileClick}
-                style={{textDecoration: 'none'}}
+                style={{ textDecoration: "none" }}
               >
-                <i className="bi bi-person" style={{fontSize:'20px'}}></i>
+                <i className="bi bi-person" style={{ fontSize: "20px" }}></i>
               </a>
-              
+
               {/* Search Icon and Search Bar */}
               <div className="search-container" ref={suggestionsRef}>
                 {showSearchBar ? (
@@ -214,18 +223,17 @@ const Header = () => {
                     )}
                   </form>
                 ) : (
-                  <a 
-                    href="#" 
-                    className="text-dark" 
-                    onClick={handleSearchClick}
-                  >
-                    <i className="bi bi-search" style={{fontSize:'20px'}}></i>
+                  <a href="#" className="text-dark" onClick={handleSearchClick}>
+                    <i
+                      className="bi bi-search"
+                      style={{ fontSize: "20px" }}
+                    ></i>
                   </a>
                 )}
               </div>
-              
-              <Link to={'/cart'} className="position-relative text-dark">
-                <i className="bi bi-cart" style={{fontSize:'20px'}}></i>
+
+              <Link to={"/cart"} className="position-relative text-dark">
+                <i className="bi bi-cart" style={{ fontSize: "20px" }}></i>
               </Link>
             </div>
           </div>
@@ -234,7 +242,7 @@ const Header = () => {
           <nav className="d-none d-md-flex justify-content-center mt-3">
             <ul className="nav">
               <li className="nav-item">
-                <Link to={'/'} className="nav-link" href="">
+                <Link to={"/"} className="nav-link" href="">
                   Home
                 </Link>
               </li>
@@ -242,18 +250,12 @@ const Header = () => {
                 <ShopDropdown />
                 <ul className="dropdown-menu">
                   <li>
-                    <a
-                      className="dropdown-item"
-                      href=""
-                    >
+                    <a className="dropdown-item" href="">
                       Coord Sets
                     </a>
                   </li>
                   <li>
-                    <a
-                      className="dropdown-item"
-                      href=""
-                    >
+                    <a className="dropdown-item" href="">
                       Basic Tshirts
                     </a>
                   </li>
@@ -263,28 +265,19 @@ const Header = () => {
                     </a>
                     <ul className="dropdown-menu">
                       <li>
-                        <a
-                          className="dropdown-item"
-                          href=""
-                        >
+                        <a className="dropdown-item" href="">
                           Printed
                         </a>
                       </li>
                       <li>
-                        <a
-                          className="dropdown-item"
-                          href=""
-                        >
+                        <a className="dropdown-item" href="">
                           Holographic
                         </a>
                       </li>
                     </ul>
                   </li>
                   <li>
-                    <a
-                      className="dropdown-item"
-                      href=""
-                    >
+                    <a className="dropdown-item" href="">
                       Tie & Dye
                     </a>
                   </li>
@@ -299,17 +292,14 @@ const Header = () => {
                     </a>
                   </li>
                   <li>
-                    <a
-                      className="dropdown-item"
-                      href=""
-                    >
+                    <a className="dropdown-item" href="">
                       Sweatshirts
                     </a>
                   </li>
                 </ul>
               </li>
               <li className="nav-item">
-                <Link to={'/bestseller'} className="nav-link" href="">
+                <Link to={"/bestseller"} className="nav-link" href="">
                   Best Sellers
                 </Link>
               </li>
@@ -323,18 +313,12 @@ const Header = () => {
                 </a>
                 <ul className="dropdown-menu">
                   <li>
-                    <a
-                      className="dropdown-item"
-                      href=""
-                    >
+                    <a className="dropdown-item" href="">
                       Winter
                     </a>
                   </li>
                   <li>
-                    <a
-                      className="dropdown-item"
-                      href=""
-                    >
+                    <a className="dropdown-item" href="">
                       Summer
                     </a>
                   </li>
@@ -370,18 +354,12 @@ const Header = () => {
                     </a>
                   </li>
                   <li>
-                    <a
-                      className="dropdown-item"
-                      href=""
-                    >
+                    <a className="dropdown-item" href="">
                       How Apparel is Made
                     </a>
                   </li>
                   <li>
-                    <a
-                      className="dropdown-item"
-                      href=""
-                    >
+                    <a className="dropdown-item" href="">
                       Responsibility
                     </a>
                   </li>

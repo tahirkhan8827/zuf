@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import Header from '../../component/Header/Header';
-import Footer from '../../component/Footer/Footer';
-import Notification from '../../component/Notification/Notification';
-import { checkAuth } from '../../component/LoginRequired/checkAuth';
-import './CategoryProductsPage.css';
+import React, { useEffect, useState } from "react";
+import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import Header from "../../component/Header/Header";
+import Footer from "../../component/Footer/Footer";
+import Notification from "../../component/Notification/Notification";
+import { checkAuth } from "../../component/LoginRequired/checkAuth";
+import "./CategoryProductsPage.css";
 
 const CategoryProductsPage = () => {
   const { category_id } = useParams();
@@ -19,7 +19,7 @@ const CategoryProductsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const showNotification = (message, type = 'success') => {
+  const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -28,12 +28,16 @@ const CategoryProductsPage = () => {
     const fetchCategoryProducts = async () => {
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          axios.get(`http://localhost:8000/api/categories/${category_id}/products/`),
-          axios.get('http://localhost:8000/api/categories/')
+          axios.get(
+            `https://zuclothingbackend.onrender.com/api/categories/${category_id}/products/`
+          ),
+          axios.get("https://zuclothingbackend.onrender.com/api/categories/"),
         ]);
 
-        const category = categoriesRes.data.find(cat => cat.id === parseInt(category_id));
-        
+        const category = categoriesRes.data.find(
+          (cat) => cat.id === parseInt(category_id)
+        );
+
         if (!category) {
           setError("Category not found");
           setLoading(false);
@@ -41,40 +45,43 @@ const CategoryProductsPage = () => {
         }
 
         const productsWithImagesAndSizes = productsRes.data.map((product) => {
-          let imageUrl = '/placeholder-product.jpg';
-          
+          let imageUrl = "/placeholder-product.jpg";
+
           if (product.colors?.length > 0) {
             const firstColor = product.colors[0];
             if (firstColor.images?.length > 0) {
-              const defaultImage = firstColor.images.find(img => img.is_default);
-              const imagePath = defaultImage?.image_url || firstColor.images[0].image_url;
-              imageUrl = `http://localhost:8000${imagePath}`;
+              const defaultImage = firstColor.images.find(
+                (img) => img.is_default
+              );
+              const imagePath =
+                defaultImage?.image_url || firstColor.images[0].image_url;
+              imageUrl = `https://zuclothingbackend.onrender.com${imagePath}`;
             }
           }
 
           // Find first available size or default to first size
-          const firstAvailableSize = product.sizes?.find(size => size.stock > 0)?.size || 
-                                  product.sizes?.[0]?.size;
+          const firstAvailableSize =
+            product.sizes?.find((size) => size.stock > 0)?.size ||
+            product.sizes?.[0]?.size;
 
           return {
             ...product,
             image: imageUrl,
-            defaultSize: firstAvailableSize
+            defaultSize: firstAvailableSize,
           };
         });
 
         setProducts(productsWithImagesAndSizes);
         setCategory(category);
-        
+
         // Initialize selected sizes
         const initialSizes = {};
-        productsWithImagesAndSizes.forEach(product => {
+        productsWithImagesAndSizes.forEach((product) => {
           if (product.defaultSize) {
             initialSizes[product.id] = product.defaultSize.id;
           }
         });
         setSelectedSizes(initialSizes);
-
       } catch (err) {
         console.error("Failed to load category products", err);
         setError("Failed to load products. Please try again later.");
@@ -93,18 +100,18 @@ const CategoryProductsPage = () => {
   };
 
   const handleSizeChange = (productId, sizeId) => {
-    setSelectedSizes(prev => ({
+    setSelectedSizes((prev) => ({
       ...prev,
-      [productId]: sizeId
+      [productId]: sizeId,
     }));
   };
 
   const addToCart = async (productId) => {
-    if (!await checkAuth()) {
-      navigate('/login', { state: { from: location.pathname } });
+    if (!(await checkAuth())) {
+      navigate("/login", { state: { from: location.pathname } });
       return;
     }
-    
+
     const selectedSizeId = selectedSizes[productId];
     if (!selectedSizeId) {
       showNotification("Please select a size", "error");
@@ -115,18 +122,21 @@ const CategoryProductsPage = () => {
       setAddingToCartId(productId);
       const csrftoken = getCookie("csrftoken");
 
-      const response = await fetch(`http://localhost:8000/api/cart/add/${productId}/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrftoken,
-        },
-        credentials: "include",
-        body: JSON.stringify({ 
-          quantity: 1,
-          size_id: selectedSizeId
-        }),
-      });
+      const response = await fetch(
+        `https://zuclothingbackend.onrender.com/api/cart/add/${productId}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            quantity: 1,
+            size_id: selectedSizeId,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -137,7 +147,10 @@ const CategoryProductsPage = () => {
       showNotification(data.message || "Product added to cart successfully!");
     } catch (error) {
       console.error("Error adding to cart:", error);
-      showNotification(error.message || "Failed to add product. Please try again.", "error");
+      showNotification(
+        error.message || "Failed to add product. Please try again.",
+        "error"
+      );
     } finally {
       setAddingToCartId(null);
     }
@@ -150,8 +163,8 @@ const CategoryProductsPage = () => {
     <>
       <Header />
       <div className="category-products-container">
-        <h1 className="category-title">{category?.category || 'Category'}</h1>
-        
+        <h1 className="category-title">{category?.category || "Category"}</h1>
+
         {notification && (
           <Notification
             message={notification.message}
@@ -179,48 +192,62 @@ const CategoryProductsPage = () => {
                     <span className="product-badge">Best Seller</span>
                   )}
                   {product.is_top_product && (
-                    <span className="product-badge top-product">Top Product</span>
+                    <span className="product-badge top-product">
+                      Top Product
+                    </span>
                   )}
                 </div>
               </Link>
               <div className="product-info-1">
                 <h3 className="product-title">
-                  <Link to={`/product/${product.id}`} className="product-title-link">
+                  <Link
+                    to={`/product/${product.id}`}
+                    className="product-title-link"
+                  >
                     {product.name}
                   </Link>
                 </h3>
                 <div className="product-price-wrapper">
-                  <span className="product-current-price">₹{product.currentprice}</span>
-                  {product.orignalprice && product.orignalprice > product.currentprice && (
-                    <span className="product-original-price">₹{product.orignalprice}</span>
-                  )}
+                  <span className="product-current-price">
+                    ₹{product.currentprice}
+                  </span>
+                  {product.orignalprice &&
+                    product.orignalprice > product.currentprice && (
+                      <span className="product-original-price">
+                        ₹{product.orignalprice}
+                      </span>
+                    )}
                 </div>
-                
+
                 {/* Added size selector */}
                 {product.sizes?.length > 0 && (
                   <div className="size-selector">
                     <select
                       value={selectedSizes[product.id] || ""}
-                      onChange={(e) => handleSizeChange(product.id, e.target.value)}
+                      onChange={(e) =>
+                        handleSizeChange(product.id, e.target.value)
+                      }
                       className="size-dropdown"
                     >
                       {product.sizes.map(({ size, stock }) => (
-                        <option 
-                          key={size.id} 
+                        <option
+                          key={size.id}
                           value={size.id}
                           disabled={stock <= 0}
                         >
-                          {size.name} {stock <= 0 ? '(Out of Stock)' : ''}
+                          {size.name} {stock <= 0 ? "(Out of Stock)" : ""}
                         </option>
                       ))}
                     </select>
                   </div>
                 )}
-                
+
                 <button
                   className="product-add-to-cart"
                   onClick={() => addToCart(product.id)}
-                  disabled={addingToCartId === product.id || !selectedSizes[product.id]}
+                  disabled={
+                    addingToCartId === product.id || !selectedSizes[product.id]
+                  }
                 >
                   {addingToCartId === product.id ? "Adding..." : "Add to Cart"}
                 </button>

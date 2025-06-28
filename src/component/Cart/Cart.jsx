@@ -21,56 +21,58 @@ const Cart = () => {
   };
 
   const fetchCartData = async () => {
-  try {
-    setCartData(prev => ({...prev, isLoading: true}));
-    
-    const response = await fetch("http://localhost:8000/api/cart/", {
-      credentials: "include",
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    try {
+      setCartData((prev) => ({ ...prev, isLoading: true }));
+
+      const response = await fetch(
+        "https://zuclothingbackend.onrender.com/api/cart/",
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Debug log
+      console.log("Cart API response:", data);
+
+      // More flexible response handling
+      const items = data.items || data.cart?.items || [];
+      const total = data.total || data.cart?.total || 0;
+      const item_count = data.item_count || data.cart?.item_count || 0;
+
+      const processedItems = items.map((item) => ({
+        ...item,
+        image: item.image || "/placeholder-product.jpg",
+        color: item.color || item.color_name || "",
+        size: item.size || item.size_name || "",
+        size_id: item.size_id || null,
+        product_id: item.product_id || item.id || null,
+      }));
+
+      setCartData({
+        items: processedItems,
+        total,
+        item_count,
+        isLoading: false,
+        error: null,
+      });
+    } catch (error) {
+      console.error("Cart fetch error:", error);
+      setCartData({
+        items: [],
+        total: 0,
+        item_count: 0,
+        isLoading: false,
+        error: error.message,
+      });
+      showNotification("Failed to load cart. Please try again.", "error");
     }
-    
-    const data = await response.json();
-
-    // Debug log
-    console.log("Cart API response:", data);
-
-    // More flexible response handling
-    const items = data.items || data.cart?.items || [];
-    const total = data.total || data.cart?.total || 0;
-    const item_count = data.item_count || data.cart?.item_count || 0;
-
-    const processedItems = items.map(item => ({
-      ...item,
-      image: item.image || '/placeholder-product.jpg',
-      color: item.color || item.color_name || '',
-      size: item.size || item.size_name || '',
-      size_id: item.size_id || null,
-      product_id: item.product_id || item.id || null
-    }));
-
-    setCartData({
-      items: processedItems,
-      total,
-      item_count,
-      isLoading: false,
-      error: null,
-    });
-
-  } catch (error) {
-    console.error("Cart fetch error:", error);
-    setCartData({
-      items: [],
-      total: 0,
-      item_count: 0,
-      isLoading: false,
-      error: error.message,
-    });
-    showNotification("Failed to load cart. Please try again.", "error");
-  }
-};
+  };
 
   useEffect(() => {
     fetchCartData();
@@ -82,33 +84,35 @@ const Cart = () => {
     if (parts.length === 2) return parts.pop().split(";").shift();
   };
 
-  const handleCartAction = async (productId, action, quantity, sizeId = null) => {
+  const handleCartAction = async (
+    productId,
+    action,
+    quantity,
+    sizeId = null
+  ) => {
     try {
       let endpoint = "";
       let body = {};
-      
+
       if (action === "remove") {
-        endpoint = `http://localhost:8000/api/cart/remove/${productId}/`;
+        endpoint = `https://zuclothingbackend.onrender.com/api/cart/remove/${productId}/`;
       } else if (action === "update") {
-        endpoint = `http://localhost:8000/api/cart/update/${productId}/`;
+        endpoint = `https://zuclothingbackend.onrender.com/api/cart/update/${productId}/`;
         body = { quantity };
         if (sizeId) {
           body.size_id = sizeId;
         }
       }
 
-      const response = await fetch(
-        endpoint,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
-          credentials: "include",
-          body: action === "remove" ? null : JSON.stringify(body),
-        }
-      );
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        credentials: "include",
+        body: action === "remove" ? null : JSON.stringify(body),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -163,14 +167,18 @@ const Cart = () => {
                         alt={item.name}
                         className="item-image"
                         onError={(e) => {
-                          e.target.src = '/placeholder-product.jpg';
+                          e.target.src = "/placeholder-product.jpg";
                         }}
                       />
                     </div>
                     <div className="item-details">
                       <h3 className="item-name">{item.name}</h3>
-                      {item.color && <p className="item-variant">Color: {item.color}</p>}
-                      {item.size_name && <p className="item-variant">Size: {item.size_name}</p>}
+                      {item.color && (
+                        <p className="item-variant">Color: {item.color}</p>
+                      )}
+                      {item.size_name && (
+                        <p className="item-variant">Size: {item.size_name}</p>
+                      )}
                       <p className="item-price">₹{item.price.toFixed(2)}</p>
                     </div>
                   </div>

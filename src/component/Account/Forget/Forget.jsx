@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Notification from '../..//Notification/Notification';
-import './Forget.css';
-import { FiMail, FiLock, FiArrowLeft } from 'react-icons/fi';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Notification from "../..//Notification/Notification";
+import "./Forget.css";
+import { FiMail, FiLock, FiArrowLeft } from "react-icons/fi";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [step, setStep] = useState(1); // 1 = request, 2 = reset
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
 
-  const showNotification = (message, type = 'success') => {
+  const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -23,78 +23,87 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/password-reset/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "https://zuclothingbackend.onrender.com/api/password-reset/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send reset email');
+        throw new Error(data.error || "Failed to send reset email");
       }
 
-      showNotification('Password reset email sent. Check your inbox!');
+      showNotification("Password reset email sent. Check your inbox!");
       setStep(1.5); // Show success message but stay on same form
     } catch (error) {
-      console.error('Reset request error:', error);
-      showNotification(error.message || 'Failed to send reset email', 'error');
+      console.error("Reset request error:", error);
+      showNotification(error.message || "Failed to send reset email", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleResetPassword = async (e) => {
-  e.preventDefault();
-  
-  if (newPassword !== confirmPassword) {
-    showNotification('Passwords do not match', 'error');
-    return;
-  }
+    e.preventDefault();
 
-  setLoading(true);
-
-  try {
-    // Get the current path and clean it up
-    const path = window.location.pathname;
-    const cleanPath = path.replace(/\/+/g, '/'); // Remove duplicate slashes
-    
-    // Extract the last two segments (uidb64 and token)
-    const segments = cleanPath.split('/').filter(Boolean);
-    const uidb64 = segments[segments.length - 2];
-    const token = segments[segments.length - 1];
-
-    const response = await fetch(`http://localhost:8000/api/password-reset-confirm/${uidb64}/${token}/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ new_password: newPassword }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to reset password');
+    if (newPassword !== confirmPassword) {
+      showNotification("Passwords do not match", "error");
+      return;
     }
 
-    const data = await response.json();
-    showNotification('Password reset successfully! Redirecting to login...');
-    setTimeout(() => navigate('/login'), 2000);
-  } catch (error) {
-    console.error('Reset error:', error);
-    showNotification(error.message || 'Failed to reset password. Please try again.', 'error');
-  } finally {
-    setLoading(false);
-  }
-};  
+    setLoading(true);
+
+    try {
+      // Get the current path and clean it up
+      const path = window.location.pathname;
+      const cleanPath = path.replace(/\/+/g, "/"); // Remove duplicate slashes
+
+      // Extract the last two segments (uidb64 and token)
+      const segments = cleanPath.split("/").filter(Boolean);
+      const uidb64 = segments[segments.length - 2];
+      const token = segments[segments.length - 1];
+
+      const response = await fetch(
+        `https://zuclothingbackend.onrender.com/api/password-reset-confirm/${uidb64}/${token}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ new_password: newPassword }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to reset password");
+      }
+
+      const data = await response.json();
+      showNotification("Password reset successfully! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (error) {
+      console.error("Reset error:", error);
+      showNotification(
+        error.message || "Failed to reset password. Please try again.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Check if this is a password reset confirmation link
   React.useEffect(() => {
     const path = window.location.pathname;
-    if (path.includes('/reset-password/')) {
+    if (path.includes("/reset-password/")) {
       setStep(2);
     }
   }, []);
@@ -107,13 +116,13 @@ const ForgotPassword = () => {
         </Link>
 
         <div className="forgot-password-header">
-          <h1>{step === 2 ? 'Reset Your Password' : 'Forgot Password'}</h1>
+          <h1>{step === 2 ? "Reset Your Password" : "Forgot Password"}</h1>
           <p>
-            {step === 2 
-              ? 'Enter your new password below' 
+            {step === 2
+              ? "Enter your new password below"
               : step === 1.5
-                ? 'Check your email for the reset link'
-                : "Enter your email and we'll send you a link to reset your password"}
+              ? "Check your email for the reset link"
+              : "Enter your email and we'll send you a link to reset your password"}
           </p>
         </div>
 
@@ -135,18 +144,23 @@ const ForgotPassword = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-button"
               disabled={loading || step === 1.5}
             >
-              {loading ? 'Sending...' : step === 1.5 ? 'Email Sent!' : 'Send Reset Link'}
+              {loading
+                ? "Sending..."
+                : step === 1.5
+                ? "Email Sent!"
+                : "Send Reset Link"}
             </button>
 
             {step === 1.5 && (
               <div className="resend-link">
-                Didn't receive the email? <button 
-                  type="button" 
+                Didn't receive the email?{" "}
+                <button
+                  type="button"
                   onClick={() => setStep(1)}
                   className="resend-button"
                 >
@@ -189,12 +203,8 @@ const ForgotPassword = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              className="submit-button"
-              disabled={loading}
-            >
-              {loading ? 'Resetting...' : 'Reset Password'}
+            <button type="submit" className="submit-button" disabled={loading}>
+              {loading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
         )}

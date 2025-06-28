@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./ProductItems.css";
-import axios from 'axios';
+import axios from "axios";
 import { Link } from "react-router-dom";
 import Notification from "../Notification/Notification";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -16,7 +16,7 @@ const ProductItems = () => {
   const [notification, setNotification] = useState(null);
   const [selectedSizes, setSelectedSizes] = useState({});
 
-  const showNotification = (message, type = 'success') => {
+  const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -28,18 +28,18 @@ const ProductItems = () => {
   };
 
   const handleSizeChange = (productId, sizeId) => {
-    setSelectedSizes(prev => ({
+    setSelectedSizes((prev) => ({
       ...prev,
-      [productId]: sizeId
+      [productId]: sizeId,
     }));
   };
 
   const addToCart = async (productId) => {
-    if (!await checkAuth()) {
-      navigate('/login', { state: { from: location.pathname } });
+    if (!(await checkAuth())) {
+      navigate("/login", { state: { from: location.pathname } });
       return;
     }
-    
+
     const selectedSizeId = selectedSizes[productId];
     if (!selectedSizeId) {
       showNotification("Please select a size", "error");
@@ -48,31 +48,37 @@ const ProductItems = () => {
 
     try {
       setAddingToCartId(productId);
-      const csrftoken = getCookie('csrftoken');
+      const csrftoken = getCookie("csrftoken");
 
-      const response = await fetch(`http://localhost:8000/api/cart/add/${productId}/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrftoken,
-        },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          quantity: 1,
-          size_id: selectedSizeId
-        })
-      });
+      const response = await fetch(
+        `https://zuclothingbackend.onrender.com/api/cart/add/${productId}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            quantity: 1,
+            size_id: selectedSizeId,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to add to cart');
+        throw new Error(data.message || "Failed to add to cart");
       }
 
-      showNotification('Item added to cart');
+      showNotification("Item added to cart");
     } catch (error) {
-      console.error('Error adding to cart:', error);
-      showNotification(error.message || 'Failed to add product. Please try again.', 'error');
+      console.error("Error adding to cart:", error);
+      showNotification(
+        error.message || "Failed to add product. Please try again.",
+        "error"
+      );
     } finally {
       setAddingToCartId(null);
     }
@@ -81,44 +87,49 @@ const ProductItems = () => {
   useEffect(() => {
     const fetchTopProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/api/products/?is_top=true');
+        const res = await axios.get(
+          "https://zuclothingbackend.onrender.com/api/products/?is_top=true"
+        );
 
         const productsWithSizes = res.data.map((product) => {
           // Find first available size or default to first size
-          const firstAvailableSize = product.sizes?.find(size => size.stock > 0)?.size || 
-                                  product.sizes?.[0]?.size;
+          const firstAvailableSize =
+            product.sizes?.find((size) => size.stock > 0)?.size ||
+            product.sizes?.[0]?.size;
 
           // Get the first available image
           let imageUrl = null;
           if (product.colors?.length > 0) {
             const firstColor = product.colors[0];
             if (firstColor.images?.length > 0) {
-              const defaultImage = firstColor.images.find(img => img.is_default);
-              imageUrl = defaultImage?.image_url || firstColor.images[0].image_url;
+              const defaultImage = firstColor.images.find(
+                (img) => img.is_default
+              );
+              imageUrl =
+                defaultImage?.image_url || firstColor.images[0].image_url;
             }
           }
 
           return {
             ...product,
             defaultSize: firstAvailableSize,
-            image: imageUrl  // Add the image URL to the product
+            image: imageUrl, // Add the image URL to the product
           };
         });
 
         setTopProducts(productsWithSizes);
-        
+
         // Initialize selected sizes
         const initialSizes = {};
-        productsWithSizes.forEach(product => {
+        productsWithSizes.forEach((product) => {
           if (product.defaultSize) {
             initialSizes[product.id] = product.defaultSize.id;
           }
         });
         setSelectedSizes(initialSizes);
-
       } catch (err) {
-        console.error('Failed to load top products', err);
-        setError('Failed to load products. Please try again later.');
+        console.error("Failed to load top products", err);
+        setError("Failed to load products. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -132,7 +143,7 @@ const ProductItems = () => {
   return (
     <>
       <h1 className="my-5 text-center fw-medium">Top Products</h1>
-      
+
       {notification && (
         <Notification
           message={notification.message}
@@ -160,17 +171,24 @@ const ProductItems = () => {
             </Link>
             <div className="best-seller-info">
               <h3 className="best-seller-title">
-                <Link to={`/product/${item.id}`} className="best-seller-title-link">
+                <Link
+                  to={`/product/${item.id}`}
+                  className="best-seller-title-link"
+                >
                   {item.name}
                 </Link>
               </h3>
               <div className="best-seller-price-wrapper">
-                <span className="best-seller-current-price">₹{item.currentprice}</span>
+                <span className="best-seller-current-price">
+                  ₹{item.currentprice}
+                </span>
                 {item.orignalprice && item.orignalprice > item.currentprice && (
-                  <span className="best-seller-original-price">₹{item.orignalprice}</span>
+                  <span className="best-seller-original-price">
+                    ₹{item.orignalprice}
+                  </span>
                 )}
               </div>
-              
+
               {/* Only added this size selector section */}
               {item.sizes?.length > 0 && (
                 <div className="size-selector">
@@ -180,19 +198,19 @@ const ProductItems = () => {
                     className="size-dropdown"
                   >
                     {item.sizes.map(({ size, stock }) => (
-                      <option 
-                        key={size.id} 
+                      <option
+                        key={size.id}
                         value={size.id}
                         disabled={stock <= 0}
                       >
-                        {size.name} {stock <= 0 ? '(Out of Stock)' : ''}
+                        {size.name} {stock <= 0 ? "(Out of Stock)" : ""}
                       </option>
                     ))}
                   </select>
                 </div>
               )}
-              
-              <button 
+
+              <button
                 className="add-to-cart-top"
                 onClick={() => addToCart(item.id)}
                 disabled={addingToCartId === item.id || !selectedSizes[item.id]}

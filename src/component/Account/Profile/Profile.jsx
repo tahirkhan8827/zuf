@@ -55,13 +55,16 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/profile/", {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "https://zuclothingbackend.onrender.com/api/profile/",
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -113,17 +116,20 @@ const Profile = () => {
   const handleConfirmLogout = async () => {
     setShowLogoutModal(false);
     try {
-      const response = await fetch("http://localhost:8000/api/logout/", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCSRFToken() || "",
-        },
-      });
+      const response = await fetch(
+        "https://zuclothingbackend.onrender.com/api/logout/",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken() || "",
+          },
+        }
+      );
 
       if (!response.ok) throw new Error("Logout failed");
-      
+
       showNotification("Successfully logged out", "success");
       setTimeout(() => {
         navigate("/");
@@ -183,14 +189,17 @@ const Profile = () => {
         throw new Error("Session expired. Please refresh the page.");
       }
 
-      const response = await fetch("http://localhost:8000/api/profile/", {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "X-CSRFToken": csrftoken,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        "https://zuclothingbackend.onrender.com/api/profile/",
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "X-CSRFToken": csrftoken,
+          },
+          body: formData,
+        }
+      );
 
       if (response.status === 403) {
         const errorData = await response.json().catch(() => ({}));
@@ -246,7 +255,7 @@ const Profile = () => {
       setLoading(false);
     }
   };
-   const handleCloseModal = () => {
+  const handleCloseModal = () => {
     setShowLogoutModal(false);
   };
 
@@ -267,16 +276,10 @@ const Profile = () => {
           <h1>My Profile</h1>
           {!editMode && (
             <div className="action-btns">
-              <button
-                className="edit-button"
-                onClick={() => setEditMode(true)}
-              >
+              <button className="edit-button" onClick={() => setEditMode(true)}>
                 <FiEdit className="btn-icon" /> Edit Profile
               </button>
-              <button 
-                className="logout-button" 
-                onClick={handleLogoutClick}
-              >
+              <button className="logout-button" onClick={handleLogoutClick}>
                 <FiLogOut className="btn-icon" /> Logout
               </button>
             </div>
@@ -304,7 +307,7 @@ const Profile = () => {
               {editMode && (
                 <div className="avatar-upload">
                   <label htmlFor="avatar-upload" className="upload-button">
-                    <FiUpload className="icon" /> 
+                    <FiUpload className="icon" />
                     {user.avatar ? "Change Photo" : "Upload Photo"}
                   </label>
                   <input
@@ -454,18 +457,17 @@ const Profile = () => {
         )}
       </div>
       <Footer />
-      
 
       <ConfirmationModal
-  isOpen={showLogoutModal}
-  onClose={handleCloseModal}
-  onConfirm={handleConfirmLogout}
-  title="Logout Confirmation"
-  message="Are you sure you want to logout?"
-  confirmText="Logout"
-  icon={FiLogOut}
-  type="danger"
-/>
+        isOpen={showLogoutModal}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmLogout}
+        title="Logout Confirmation"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        icon={FiLogOut}
+        type="danger"
+      />
     </>
   );
 };

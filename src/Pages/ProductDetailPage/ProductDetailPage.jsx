@@ -34,78 +34,86 @@ const ProductDetailPage = () => {
   };
 
   // In your ProductDetailPage.jsx
-const addToCart = async () => {
-  // Validate required fields first
-  if (!selectedSize) {
-    showNotification('Please select a size before adding to cart', 'error');
-    return;
-  }
-
-  try {
-    setIsAddingToCart(true);
-    const csrftoken = getCookie('csrftoken');
-
-    // Validate CSRF token
-    if (!csrftoken) {
-      throw new Error('Authentication error. Please refresh the page and try again.');
+  const addToCart = async () => {
+    // Validate required fields first
+    if (!selectedSize) {
+      showNotification("Please select a size before adding to cart", "error");
+      return;
     }
 
-    const response = await fetch(`http://localhost:8000/api/cart/add/${product.id}/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,
-      },
-      credentials: 'include',
-      body: JSON.stringify({ 
-        quantity,
-        size_id: selectedSize.id,
-        color_id: selectedColor?.id // Include color if needed
-      })
-    });
+    try {
+      setIsAddingToCart(true);
+      const csrftoken = getCookie("csrftoken");
 
-    // Handle non-JSON responses
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Invalid server response');
-    }
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      // Handle specific error cases
-      if (response.status === 400 && data.errors) {
-        const errorMessages = Object.values(data.errors).flat();
-        throw new Error(errorMessages.join(', ') || 'Invalid request');
+      // Validate CSRF token
+      if (!csrftoken) {
+        throw new Error(
+          "Authentication error. Please refresh the page and try again."
+        );
       }
-      throw new Error(data.message || `Error: ${response.statusText}`);
-    }
 
-    // Success handling
-    showNotification(data.message || `${product.name} (Size: ${selectedSize.name}) added to cart!`, 'success');
-    
-    // Update cart count in header
-    if (window.updateCartCount) {
-      window.updateCartCount();
-    }
+      const response = await fetch(
+        `https://zuclothingbackend.onrender.com/api/cart/add/${product.id}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            quantity,
+            size_id: selectedSize.id,
+            color_id: selectedColor?.id, // Include color if needed
+          }),
+        }
+      );
 
-  } catch (error) {
-    console.error('Cart Error:', {
-      error: error.message,
-      productId: product.id,
-      sizeId: selectedSize.id
-    });
-    
-    // User-friendly error messages
-    const errorMessage = error.message.includes('Network Error') 
-      ? 'Network error - please check your connection'
-      : error.message || 'Failed to update your cart. Please try again.';
-    
-    showNotification(errorMessage, 'error');
-  } finally {
-    setIsAddingToCart(false);
-  }
-};
+      // Handle non-JSON responses
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid server response");
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle specific error cases
+        if (response.status === 400 && data.errors) {
+          const errorMessages = Object.values(data.errors).flat();
+          throw new Error(errorMessages.join(", ") || "Invalid request");
+        }
+        throw new Error(data.message || `Error: ${response.statusText}`);
+      }
+
+      // Success handling
+      showNotification(
+        data.message ||
+          `${product.name} (Size: ${selectedSize.name}) added to cart!`,
+        "success"
+      );
+
+      // Update cart count in header
+      if (window.updateCartCount) {
+        window.updateCartCount();
+      }
+    } catch (error) {
+      console.error("Cart Error:", {
+        error: error.message,
+        productId: product.id,
+        sizeId: selectedSize.id,
+      });
+
+      // User-friendly error messages
+      const errorMessage = error.message.includes("Network Error")
+        ? "Network error - please check your connection"
+        : error.message || "Failed to update your cart. Please try again.";
+
+      showNotification(errorMessage, "error");
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   const handleBuyNow = async () => {
     if (!selectedSize) {
@@ -124,7 +132,7 @@ const addToCart = async () => {
     const fetchProduct = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/products/${id}/`
+          `https://zuclothingbackend.onrender.com/api/products/${id}/`
         );
         if (!response.ok) {
           throw new Error("Product not found");
@@ -343,22 +351,22 @@ const addToCart = async () => {
             {/* Action Buttons */}
             <div className="action-buttons">
               <button
-  className="add-to-cart"
-  onClick={addToCart}  // Changed from onClick={() => addToCart(product.id)}
-  disabled={isAddingToCart || !selectedSize}
->
-  {isAddingToCart ? (
-    "Adding..."
-  ) : (
-    <>
-      <span>Add to cart</span>
-      <span className="separator">•</span>
-      <span>
-        ₹ {(product.currentprice * quantity).toFixed(2)}
-      </span>
-    </>
-  )}
-</button>
+                className="add-to-cart"
+                onClick={addToCart} // Changed from onClick={() => addToCart(product.id)}
+                disabled={isAddingToCart || !selectedSize}
+              >
+                {isAddingToCart ? (
+                  "Adding..."
+                ) : (
+                  <>
+                    <span>Add to cart</span>
+                    <span className="separator">•</span>
+                    <span>
+                      ₹ {(product.currentprice * quantity).toFixed(2)}
+                    </span>
+                  </>
+                )}
+              </button>
               <button
                 className="buy-now"
                 onClick={handleBuyNow}
